@@ -16,9 +16,9 @@ test('search journey with station names', async({page}) => {
 
 test('add adults', async({page}) => {
     const planJourneyPage = new PlanJourney(page)
-    const [searchedJourney, numberOfPeople] = await planJourneyPage.searchJourneyWithMoreAdults()
+    const [searchedJourney, numberOfAdults] = await planJourneyPage.searchJourneyWithMoreAdults()
 
-    expect(searchedJourney).toContain(`${numberOfPeople} Adults`)
+    expect(searchedJourney).toContain(`${numberOfAdults} Adults`)
 })
 
 test('search fastest trains', async({page}) => {
@@ -40,4 +40,11 @@ test('select date within thirty days', async({page}) => {
     const [searchedJourney, fullExpectedDate] = await planJourneyPage.selectDateWithinThirtyDays()
 
     expect(searchedJourney).toContain(fullExpectedDate)
+})
+
+test('add railcard', async({page}) => {
+    const planJourneyPage = new PlanJourney(page)
+    const [railcardsAmount, searchedJourney] = await planJourneyPage.selectAmountOfRailcards()
+
+    expect(searchedJourney).toContain(`${railcardsAmount} Railcard`)
 })

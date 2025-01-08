@@ -1,5 +1,5 @@
 import { Page} from "@playwright/test";
-
+import railcards from '../test-data/railcards.json'
 
 export class PlanJourney{
     readonly page: Page
@@ -41,6 +41,22 @@ export class PlanJourney{
         return [departureStationName, arrivalStationName]
     }
 
+    async fillPassengersAdults(){
+        const numberOfAdults = (Math.floor(Math.random() * 10)).toString()
+        await this.page.locator('#adults').selectOption({value: numberOfAdults})
+
+        return numberOfAdults
+    }
+
+    async fillPassengersChildren(numberOfAdults: number){
+        const maxNumPassengers = 9
+        const spacesLeft = maxNumPassengers - numberOfAdults
+        const numberOfChildren = (Math.floor(Math.random() * (spacesLeft+1))).toString()
+        await this.page.locator('#children').selectOption({value: numberOfChildren})
+
+        return numberOfChildren
+    }
+
     async searchJourneyStationNames(){
         const [departureStationName, arrivalStationName] = await this.fillInDepartureArrival()
         await this.page.getByRole('button', {name: "Get times and prices"}).first().click()
@@ -52,14 +68,13 @@ export class PlanJourney{
 
     async searchJourneyWithMoreAdults(){
         await this.fillInDepartureArrival()
-        const numberOfPeople = (Math.floor(Math.random() * 8) + 2).toString()
+        const numberOfAdults = await this.fillPassengersAdults()
 
-        await this.page.locator('#adults').selectOption({value: numberOfPeople})
         await this.page.getByRole('button', {name: "Get times and prices"}).click()
 
         const searchedJourney = await this.page.locator('#grid-jp-results').textContent()
 
-        return [searchedJourney, numberOfPeople]
+        return [searchedJourney, numberOfAdults]
     }
 
     async fastestTrainsOnly(){
@@ -117,5 +132,31 @@ export class PlanJourney{
         const searchedJourney = await this.page.locator('#station-heading-journey-planner-query').locator('..').textContent()
      
         return [searchedJourney, fullExpectedDate]
+    }
+
+    async selectAmountOfRailcards(){
+        await this.fillInDepartureArrival()
+
+        const listOfRailcards = JSON.parse(JSON.stringify(railcards))
+        const railcardNumber = (Math.floor(Math.random() * listOfRailcards.railcards.length))
+
+        const numberOfAdults = Number(await this.fillPassengersAdults())
+        const numberOfChildren = await this.fillPassengersChildren(numberOfAdults)
+
+        let amount = (Math.floor(Math.random() * ((Number(numberOfAdults))+(Number(numberOfChildren)))+1)).toString()
+
+        await this.page.getByRole('button', {name: "Add Railcard"}).click()
+        await this.page.locator('#railcard-0').selectOption({value: listOfRailcards.railcards[railcardNumber]})
+        await this.page.locator('#railcard-0-count').selectOption({value: amount})
+       
+        await this.page.getByRole('button', {name: "Get times and prices"}).click()
+
+        const searchedJourney = await this.page.locator('#jp-summary-buy-link').locator('..').locator('..').textContent()
+
+        if(amount === "0"){
+            amount = "No"
+        }
+
+        return [amount, searchedJourney]
     }
 }
