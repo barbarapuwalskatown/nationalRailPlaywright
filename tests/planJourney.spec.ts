@@ -21,6 +21,18 @@ test('add adults', async({page}) => {
     expect(searchedJourney).toContain(`${numberOfAdults} Adults`)
 })
 
+test('add children', async({page}) => {
+    const planJourneyPage = new PlanJourney(page)
+    const [searchedJourney, numberOfChildren] = await planJourneyPage.searchJourneyWithMoreChildren()
+
+    if(numberOfChildren === "0") {
+        expect(searchedJourney).not.toContain(`Child`)
+    } else {
+        expect(searchedJourney).toContain(`${numberOfChildren} Child`)
+    }
+    
+})
+
 test('search fastest trains', async({page}) => {
     const planJourneyPage = new PlanJourney(page)
     const searchedJourney = await planJourneyPage.fastestTrainsOnly()
@@ -47,4 +59,11 @@ test('add railcard', async({page}) => {
     const [railcardsAmount, searchedJourney] = await planJourneyPage.selectAmountOfRailcards()
 
     expect(searchedJourney).toContain(`${railcardsAmount} Railcard`)
+})
+
+test('add extra time', async({page}) => {
+    const planJourneyPage = new PlanJourney(page)
+    const [searchedJourney,extraTimeText] = await planJourneyPage.addExtraTime()
+
+    expect(searchedJourney).toContain(`${extraTimeText}`)
 })

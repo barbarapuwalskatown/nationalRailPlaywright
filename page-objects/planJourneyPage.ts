@@ -77,6 +77,18 @@ export class PlanJourney{
         return [searchedJourney, numberOfAdults]
     }
 
+    async searchJourneyWithMoreChildren(){
+        await this.fillInDepartureArrival()
+        const numberOfAdults = Number(await this.fillPassengersAdults())
+        const numberOfChildren = await this.fillPassengersChildren(numberOfAdults)
+        
+        await this.page.getByRole('button', {name: "Get times and prices"}).click()
+
+        const searchedJourney = await this.page.locator('#grid-jp-results').textContent()
+
+        return [searchedJourney, numberOfChildren]
+    }
+
     async fastestTrainsOnly(){
         await this.fillInDepartureArrival()
 
@@ -158,5 +170,22 @@ export class PlanJourney{
         }
 
         return [amount, searchedJourney]
+    }
+
+    async addExtraTime(){
+        await this.fillInDepartureArrival()
+        const extraTimeOption = (Math.floor(Math.random() * 4)+1).toString()
+
+        await this.page.getByRole('button', {name: "Journey options"}).click()
+        await this.page.locator('#extra-time').selectOption({value: extraTimeOption})
+
+        const extraTimeText = await this.page.locator(`#extra-time`).innerText()
+        const extraTimeSplit = extraTimeText.split('\n')
+
+        await this.page.getByRole('button', {name: "Get times and prices"}).click()
+
+        const searchedJourney = await this.page.locator('#station-heading-journey-planner-query').locator('..').textContent()
+
+        return [searchedJourney,extraTimeSplit[extraTimeOption]]
     }
 }
