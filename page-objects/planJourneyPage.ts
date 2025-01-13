@@ -24,7 +24,7 @@ export class PlanJourney{
         return arrivalName
     }
 
-    async fillInDepartureArrival(){
+    async fillInDepartureArrivalStationInputs(){
         const departureStationName = this.departureStationName()
         const arrivalStationName = this.arrivalStationName()
 
@@ -41,14 +41,14 @@ export class PlanJourney{
         return [departureStationName, arrivalStationName]
     }
 
-    async fillPassengersAdults(){
+    async selectNumberOfAdults(){
         const numberOfAdults = (Math.floor(Math.random() * 10)).toString()
         await this.page.locator('#adults').selectOption({value: numberOfAdults})
 
         return numberOfAdults
     }
 
-    async fillPassengersChildren(numberOfAdults: number){
+    async selectNumberOfChildren(numberOfAdults: number){
         const maxNumPassengers = 9
         const spacesLeft = maxNumPassengers - numberOfAdults
         const numberOfChildren = (Math.floor(Math.random() * (spacesLeft+1))).toString()
@@ -57,8 +57,8 @@ export class PlanJourney{
         return numberOfChildren
     }
 
-    async searchJourneyStationNames(){
-        const [departureStationName, arrivalStationName] = await this.fillInDepartureArrival()
+    async searchJourneyWithDepartureArrivalStationNames(){
+        const [departureStationName, arrivalStationName] = await this.fillInDepartureArrivalStationInputs()
         await this.page.getByRole('button', {name: "Get times and prices"}).first().click()
 
         const searchedJourney = await this.page.locator('#station-heading-journey-planner-query').textContent()
@@ -66,9 +66,9 @@ export class PlanJourney{
         return [searchedJourney, departureStationName, arrivalStationName]
     }
 
-    async searchJourneyWithMoreAdults(){
-        await this.fillInDepartureArrival()
-        const numberOfAdults = await this.fillPassengersAdults()
+    async searchJourneyWithChangedAmountOfAdults(){
+        await this.fillInDepartureArrivalStationInputs()
+        const numberOfAdults = await this.selectNumberOfAdults()
 
         await this.page.getByRole('button', {name: "Get times and prices"}).click()
 
@@ -77,10 +77,10 @@ export class PlanJourney{
         return [searchedJourney, numberOfAdults]
     }
 
-    async searchJourneyWithMoreChildren(){
-        await this.fillInDepartureArrival()
-        const numberOfAdults = Number(await this.fillPassengersAdults())
-        const numberOfChildren = await this.fillPassengersChildren(numberOfAdults)
+    async searchJourneyWithWithChangedAmountOfChildren(){
+        await this.fillInDepartureArrivalStationInputs()
+        const numberOfAdults = Number(await this.selectNumberOfAdults())
+        const numberOfChildren = await this.selectNumberOfChildren(numberOfAdults)
         
         await this.page.getByRole('button', {name: "Get times and prices"}).click()
 
@@ -89,8 +89,8 @@ export class PlanJourney{
         return [searchedJourney, numberOfChildren]
     }
 
-    async fastestTrainsOnly(){
-        await this.fillInDepartureArrival()
+    async searchJourneyWithFastestTrainsOption(){
+        await this.fillInDepartureArrivalStationInputs()
 
         await this.page.getByRole('button', {name: "Journey options"}).click()
         await this.page.getByRole('checkbox', {name: "Fastest trains only"}).check()
@@ -102,8 +102,8 @@ export class PlanJourney{
         return searchedJourney
     }
 
-    async notChangeAt(){
-        await this.fillInDepartureArrival()
+    async searchJourneyWithNotChangeAtStationChosen(){
+        await this.fillInDepartureArrivalStationInputs()
 
         await this.page.getByRole('button', {name: "Route"}).click()
         await this.page.locator('#route-constraint-type').selectOption({value: "do-not-change-at"})
@@ -124,8 +124,8 @@ export class PlanJourney{
         return [searchedJourney, notChangeStationName[0]]
     }
         
-    async selectDateWithinThirtyDays(){
-        await this.fillInDepartureArrival()
+    async searchJourneyWithSelectedTravelDateWithinThirtyDays(){
+        await this.fillInDepartureArrivalStationInputs()
 
         await this.page.locator('#leaving-date').click()
 
@@ -146,14 +146,14 @@ export class PlanJourney{
         return [searchedJourney, fullExpectedDate]
     }
 
-    async selectAmountOfRailcards(){
-        await this.fillInDepartureArrival()
+    async searchJourneyWithSelectedRailcardNameAndAmount(){
+        await this.fillInDepartureArrivalStationInputs()
 
         const listOfRailcards = JSON.parse(JSON.stringify(railcards))
         const railcardNumber = (Math.floor(Math.random() * listOfRailcards.railcards.length))
 
-        const numberOfAdults = Number(await this.fillPassengersAdults())
-        const numberOfChildren = await this.fillPassengersChildren(numberOfAdults)
+        const numberOfAdults = Number(await this.selectNumberOfAdults())
+        const numberOfChildren = await this.selectNumberOfChildren(numberOfAdults)
 
         let amount = (Math.floor(Math.random() * ((Number(numberOfAdults))+(Number(numberOfChildren)))+1)).toString()
 
@@ -172,8 +172,8 @@ export class PlanJourney{
         return [amount, searchedJourney]
     }
 
-    async addExtraTime(){
-        await this.fillInDepartureArrival()
+    async searchJourneyWithAddedExtraTime(){
+        await this.fillInDepartureArrivalStationInputs()
         const extraTimeOption = (Math.floor(Math.random() * 4)+1).toString()
 
         await this.page.getByRole('button', {name: "Journey options"}).click()
